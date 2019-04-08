@@ -1,0 +1,10 @@
+.App {
+  background-image: url("./assets/2.gif");
+  /* background-image: url("./assets/2.gif") no-repeat center center fixed; */
+  /* -webkit-background-size: cover; */
+  /* -moz-background-size: cover; */
+  /* -o-background-size: cover; */
+  /* background-size: cover; */
+  background-size: cover;
+  background-repeat: no-repeat;
+}

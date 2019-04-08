@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gif</title>
+    <style>
+        body {
+            background-color: #C0B0C8;
+        }
+        td.cell {
+            border:1px solid black;
+            vertical-align: bottom;
+        }
+        td.empty {
+            border:0px solid black;
+        }
+        img {
+            width:100%;
+        }
+        td.empty img {
+            visibility: hidden;
+        }
+        td.allways_empty {
+            visibility: hidden;
+        }
+        button, span.info {
+            font-size: 18px;
+            line-height: 45px;
+            width: 60%;
+            display: inherit;
+            margin: 4%;
+        }
+        span.info {
+            margin: 0%;
+            padding: 4%;
+            background-color:#F3F5F4;
+            display: inline;
+            width: 50%;
+        }
+    </style>
+    <script>
+        var addLlamaInterval = {}
+        var addTimeInterval = {}
+        var llamaMoveInterval = {}
+        var fastLlamaMoveInterval = {}
+        Element.prototype.remove = function() {
+            this.parentElement.removeChild(this);
+        }
+        NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+            for(var i = this.length - 1; i >= 0; i--) {
+                if(this[i] && this[i].parentElement) {
+                    this[i].parentElement.removeChild(this[i]);
+                }
+            }
+        }
+        window.addEventListener("keydown", function(e) {
+            // space and arrow keys
+            if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+                e.preventDefault();
+            }
+        }, false);
+
+        window.addEventListener("keydown", event => {
+            var me_sprite = document.getElementById('me');
+            var points = document.getElementById('points');
+            var time = document.getElementById('time');
+            if (event.isComposing || event.keyCode === 39) { // megaman move right
+                if ((!(me_sprite.parentElement.getAttribute('cell') == '20')) && !(me_sprite.getAttribute('locked') == 'yes')) { // wall or locked
+                    if (me_sprite.getAttribute('power').includes('fire')) { // change direction
+                        me_sprite.setAttribute('src','Megaman still fire.gif')
+                    } else {
+                        me_sprite.setAttribute('src','Megaman still.gif')
+                    }
+                    nextcell = me_sprite.parentElement.nextElementSibling // destination
+                    if (nextcell.children.length == 0) { // if empty
+                        nextcell.appendChild(me_sprite); // make move
+                    } else {
+                        if (nextcell.children[0].getAttribute('power') != null) { // power up to move into
+                            console.log('power up '+nextcell.children[0].getAttribute('power'))
+                            me_sprite.setAttribute('power',nextcell.children[0].getAttribute('power')) // set megaman power up
+                            nextcell.children[0].remove();
+                            me_sprite.setAttribute('src','Megaman still fire.gif');
+                            nextcell.appendChild(me_sprite); // remove power up and make move
+                            points.innerHTML = (parseInt(points.innerHTML)+5) // add points
+                        }
+                    }
+                }
+            }
+            if (event.isComposing || event.keyCode === 37) { // megaman move left
+                if ((!(me_sprite.parentElement.getAttribute('cell') == '1') && !(me_sprite.getAttribute('locked') == 'yes'))) { // wall or locked
+                    if (me_sprite.getAttribute('power').includes('fire')) { // change direction
+                        me_sprite.setAttribute('src','Megaman still L fire.gif')
+                    } else {
+                        me_sprite.setAttribute('src','Megaman still L.gif')
+                    }
+                    perviouscell = me_sprite.parentElement.previousElementSibling // destination
+                    if (perviouscell.children.length == 0) { // if empty
+                        perviouscell.appendChild(me_sprite); // make move
+                    } else {
+                        if (perviouscell.children[0].getAttribute('power') != null) { // power up to move into
+                            console.log('power up '+perviouscell.children[0].getAttribute('power'))
+                            me_sprite.setAttribute('power',perviouscell.children[0].getAttribute('power')) // set megaman power up
+                            perviouscell.children[0].remove();
+                            me_sprite.setAttribute('src','Megaman still L fire.gif');
+                            perviouscell.appendChild(me_sprite); // remove power up and make move
+                            points.innerHTML = (parseInt(points.innerHTML)+5) // add points
+                        }
+                    }
+                }
+            }
+            if (event.isComposing || event.keyCode === 38) { // megaman move up
+                if ((!(me_sprite.parentElement.parentElement.classList.contains('row1'))) && !(me_sprite.getAttribute('locked') == 'yes')) { // wall or locked
+                    cellabove = me_sprite.parentElement.parentElement.previousElementSibling.children[me_sprite.parentElement.getAttribute('cell')-1] // destination
+                    if (cellabove.children.length == 0) { // if empty
+                        cellabove.appendChild(me_sprite) // make move
+                    } else {
+                        if (cellabove.children[0].getAttribute('power') != null) { // power up to move into
+                            console.log('power up '+cellabove.children[0].getAttribute('power'))
+                            me_sprite.setAttribute('power',cellabove.children[0].getAttribute('power')) // set megaman power up
+                            cellabove.children[0].remove();
+                            cellabove.appendChild(me_sprite); // remove power up and make move
+                            points.innerHTML = (parseInt(points.innerHTML)+5) // add points
+                            if (me_sprite.getAttribute('src').includes('L')) { // change direction
+                                me_sprite.setAttribute('src','Megaman still L fire.gif')
+                            } else {
+                                me_sprite.setAttribute('src','Megaman still fire.gif')
+                            }
+                        }
+                    }
+                }
+            }
+            if (event.isComposing || event.keyCode === 40) { // megaman move down
+                if ((!(me_sprite.parentElement.parentElement.classList.contains('row20'))) && !(me_sprite.getAttribute('locked') == 'yes')) { // wall or locked
+                    cellbelow = me_sprite.parentElement.parentElement.nextElementSibling.children[me_sprite.parentElement.getAttribute('cell')-1] // destination
+                    if (cellbelow.children.length == 0) { // if empty
+                        cellbelow.appendChild(me_sprite) // make move
+                    } else {
+                        if (cellbelow.children[0].getAttribute('power') != null) { // power up to move into
+                            console.log('power up '+cellbelow.children[0].getAttribute('power'))
+                            me_sprite.setAttribute('power',cellbelow.children[0].getAttribute('power')) // set megaman power up
+                            cellbelow.children[0].remove()
+                            cellbelow.appendChild(me_sprite); // remove power up and make move
+                            points.innerHTML = (parseInt(points.innerHTML)+5) // add points
+                            if (me_sprite.getAttribute('src').includes('L')) { // change direction
+                                me_sprite.setAttribute('src','Megaman still L fire.gif')
+                            } else {
+                                me_sprite.setAttribute('src','Megaman still fire.gif')
+                            }
+                        }
+                    }
+                }
+            }
+            if (event.isComposing || event.keyCode === 83) { // s (shoot)
+                if (me_sprite != null) {
+                    if (me_sprite.getAttribute('src').includes(' L')) { // shoot left or right
+                        if (me_sprite.parentElement.getAttribute('cell') != "1") { // not into a wall
+                            megamanShoot('left', me_sprite.parentElement); // start shooting method
+                            setTimeout( function () {
+                                if (me_sprite.getAttribute('src').includes(' L')) {  // stop shooting gif
+                                    if (me_sprite.getAttribute('power').includes('fire')) {
+                                        me_sprite.setAttribute('src','Megaman still L fire.gif')
+                                    } else {
+                                        me_sprite.setAttribute('src','Megaman still L.gif')
+                                    }
+                                } else {
+                                    if (me_sprite.getAttribute('power').includes('fire')) {
+                                        me_sprite.setAttribute('src','Megaman still fire.gif')
+                                    } else {
+                                        me_sprite.setAttribute('src','Megaman still.gif')
+                                    }
+                                }
+                            }, 1000)
+                        }
+                    } else {
+                        if (me_sprite.parentElement.getAttribute('cell') != "20") { // not into a wall
+                            megamanShoot('right', me_sprite.parentElement); // start shooting method
+                            setTimeout( function () {
+                                if (me_sprite.getAttribute('src').includes(' L')) {  // stop shooting gif
+                                    if (me_sprite.getAttribute('power').includes('fire')) {
+                                        me_sprite.setAttribute('src','Megaman still L fire.gif')
+                                    } else {
+                                        me_sprite.setAttribute('src','Megaman still L.gif')
+                                    }
+                                } else {
+                                    if (me_sprite.getAttribute('power').includes('fire')) {
+                                        me_sprite.setAttribute('src','Megaman still fire.gif')
+                                    } else {
+                                        me_sprite.setAttribute('src','Megaman still.gif')
+                                    }
+                                }
+                            }, 1000)
+                        }
+                    }
+                }
+            }
+        });
+        function megamanShoot(direction, cell) {
+            var me_sprite = document.getElementById('me');
+            if (direction == 'left') {
+                if (me_sprite.getAttribute('power').includes("fire")) { // check powerup
+                    me_sprite.setAttribute('src','Megaman shooting L fire.gif')
+                } else {
+                    me_sprite.setAttribute('src','Megaman shooting L.gif')
+                }
+                me_sprite.setAttribute('locked','yes'); // cant move when shooting
+                if (cell.previousElementSibling.children.length != 0) {  // if somethings there
+                    cell.previousElementSibling.children[0].setAttribute('locked','yes'); // cant move when getting shot
+                    setTimeout( function () {
+                        me_sprite.setAttribute('locked','no'); // unlock after firing
+                        if (me_sprite.getAttribute('power').includes('fire')) { // how does llama die
+                            cell.previousElementSibling.children[0].setAttribute('src','llama dying fire.gif') // fire
+                            target = cell.previousElementSibling;
+                            fire_targets = []
+                            console.log(target)
+                            if (target.previousElementSibling != null) { // left not a wall
+                                fire_targets.push(target.previousElementSibling)
+                            }
+                            if (target.parentElement.previousElementSibling != null) { // up not a wall
+                                fire_targets.push(target.parentElement.previousElementSibling.children[target.getAttribute('cell')-1])
+                            }
+                            if (target.parentElement.nextElementSibling != null) { // down not a wall
+                                fire_targets.push(target.parentElement.nextElementSibling.children[target.getAttribute('cell')-1])
+                            }
+                            for (b=0;b<fire_targets.length;b++) { // not a wall
+                                if (fire_targets[b].children.length != 0 && fire_targets[b].children[0].classList.contains('llama')) {
+                                    fire_targets[b].children[0].setAttribute('src','llama dying fire.gif')
+                                    points.innerHTML = parseInt(points.innerHTML)+parseInt(fire_targets[b].children[0].getAttribute('points'))
+                                }
+                            }
+                            setTimeout( function () {
+                                for (b=0;b<fire_targets.length;b++) { // not a wall
+                                    if (fire_targets[b].children.length != 0) {
+                                        fire_targets[b].children[0].remove();
+                                    }
+                                }
+                            }, 700)
+                        } else {
+                            cell.previousElementSibling.children[0].setAttribute('src','llama dying.gif')
+                        }
+                        points.innerHTML = parseInt(points.innerHTML)+parseInt(cell.previousElementSibling.children[0].getAttribute('points')) // add points
+                        setTimeout( function () {
+                            cell.previousElementSibling.children[0].remove(); // remove llama after dying gif
+                        }, 700)
+                    }, 700)
+                } else {
+                    setTimeout( function () {
+                        me_sprite.setAttribute('locked','no'); // unlock after shooting if nothing
+                    }, 700)
+                }
+            } else {
+                if (me_sprite.getAttribute('power').includes("fire")) { // check powerup
+                    me_sprite.setAttribute('src','Megaman shooting fire.gif')
+                } else {
+                    me_sprite.setAttribute('src','Megaman shooting.gif')
+                }
+                me_sprite.setAttribute('locked','yes'); // cant move when shooting
+                if (cell.nextElementSibling.children.length != 0) {  // if somethings there
+                    cell.nextElementSibling.children[0].setAttribute('locked','yes'); // cant move when getting shot
+                    setTimeout( function () {
+                        me_sprite.setAttribute('locked','no'); // unlock after firing
+                        if (me_sprite.getAttribute('power').includes('fire')) { // how does llama die
+                            cell.nextElementSibling.children[0].setAttribute('src','llama dying fire.gif') // fire
+                            target = cell.nextElementSibling;
+                            fire_targets = []
+                            console.log(target)
+                            if (target.nextElementSibling != null) { // right not a wall
+                                fire_targets.push(target.nextElementSibling)
+                            }
+                            if (target.parentElement.previousElementSibling != null) { // up not a wall
+                                fire_targets.push(target.parentElement.previousElementSibling.children[target.getAttribute('cell')-1])
+                            }
+                            if (target.parentElement.nextElementSibling != null) { // down not a wall
+                                fire_targets.push(target.parentElement.nextElementSibling.children[target.getAttribute('cell')-1])
+                            }
+                            for (b=0;b<fire_targets.length;b++) { // not a wall
+                                if (fire_targets[b].children.length != 0 && fire_targets[b].children[0].classList.contains('llama')) {
+                                    fire_targets[b].children[0].setAttribute('src','llama dying fire.gif')
+                                    points.innerHTML = parseInt(points.innerHTML)+parseInt(fire_targets[b].children[0].getAttribute('points'))
+                                }
+                            }
+                            setTimeout( function () {
+                                for (b=0;b<fire_targets.length;b++) { // not a wall
+                                    if (fire_targets[b].children.length != 0) {
+                                        fire_targets[b].children[0].remove();
+                                    }
+                                }
+                            }, 700)
+                        } else {
+                            cell.nextElementSibling.children[0].setAttribute('src','llama dying.gif')
+                        }
+                        points.innerHTML = parseInt(points.innerHTML)+parseInt(cell.nextElementSibling.children[0].getAttribute('points')) // add points
+                        setTimeout( function () {
+                            cell.nextElementSibling.children[0].remove(); // remove llama after dying gif
+                        }, 700)
+                    }, 700)
+                } else {
+                    setTimeout( function () {
+                        me_sprite.setAttribute('locked','no'); // unlock after shooting if nothing
+                    }, 700)
+                }
+            }
+        }
+    </script>
+    <script>
+        function makeLlamas() {
+            var points = document.getElementById('points');
+            var time = document.getElementById('time');
+            addLlamaInterval = setInterval(addLlama, 5000); // new llama every 5s
+            addTimeInterval = setInterval(addTime, 1000); // add time every 1s
+            llamaMoveInterval = setInterval(moveLlamas, 2500); // llama move every 2.5s
+            setTimeout( function () {
+                fastLlamaMoveInterval = setInterval(moveFastLlamas, 2500); // 1.25s after start move, add fast llama move every 2.5s (therefore move every 1.25s)
+            }, 1250)
+            points.innerHTML = "0"; // reset score
+            time.innerHTML = "0"; // reset time
+            for (z=0;z<12;z++) { // add 12 starter items:
+                cell = document.getElementsByTagName('td')[Math.floor((Math.random() * 400) + 1)] // choose random cell
+                if (cell.children.length == 0) { // if empty
+                    if (z == 1) {
+                        cell.insertAdjacentHTML('beforeend', '<img src="llama ninja.gif" class="llama fast" points="3">')
+                    } else if (z == 2) {
+                        cell.insertAdjacentHTML('beforeend', '<img src="llama golden.gif" class="llama fast" points="5">')
+                    } else if (z == 3) {
+                        cell.insertAdjacentHTML('beforeend', '<img src="llama cape.gif" class="llama fast" points="2">')
+                    } else if (z == 4) {
+                        cell.insertAdjacentHTML('beforeend', '<img src="llama fancy.gif" class="llama" points="3">')
+                    } else if (z == 5) {
+                        cell.insertAdjacentHTML('beforeend', '<img src="llama king.gif" class="llama" points="4">')
+                    } else if (z == 6 || z == 7) {
+                        cell.insertAdjacentHTML('beforeend', '<img src="color pattern clone.gif" class="powerup" power="fire">') // 2 power ups short hand
+                    } else {
+                        cell.insertAdjacentHTML('beforeend', '<img src="llama.gif" class="llama" points="1">')
+                    }
+                }
+            }
+        }
+        function stopLlamas() {
+            clearInterval(addLlamaInterval);
+            clearInterval(addTimeInterval);
+            clearInterval(llamaMoveInterval);
+            clearInterval(fastLlamaMoveInterval);
+            var me_sprite = document.getElementById('me');
+            me_sprite.setAttribute('power','none'); // reset power
+            document.getElementsByClassName('llama').remove(); // remove all llamas
+            document.getElementsByClassName('powerup').remove(); // remove all powerups
+            var points = document.getElementById('points').innerHTML;
+            var time = document.getElementById('time').innerHTML;
+            if (time != "0") { // if not too fast add to scores
+                document.getElementById('scores').insertAdjacentHTML('beforeend', '<tr><td style="border-right:1px solid black">'+points+'</td><td style="">'+time+'</td></tr>')
+            }
+        }
+        function addLlama() {
+            cell = document.getElementsByTagName('td')[Math.floor((Math.random() * 400) + 1)] // random cell
+            if (cell.children.length == 0) { // if empty
+                cell.insertAdjacentHTML('beforeend', '<img src="llama.gif" class="llama" points="1">') // add a llama
+            }
+        }
+        function addTime() {
+            time.innerHTML = (parseInt(time.innerHTML)+1); // add a time unit
+            if (time.innerHTML % 10 == 0) { changeBackground() } // every 10s change background
+            if (time.innerHTML == 30) {
+                stopLlamas();
+            }
+        }
+        function moveLlamas() {
+            for (v=0;v < document.getElementsByClassName('llama').length;v++) { // every llama
+                llama = document.getElementsByClassName('llama')[v] // this one
+                if (llama.getAttribute('locked') == null || llama.getAttribute('locked') == 'no') { // if not locked
+                    direction_index = (Math.floor(Math.random() * 4)+1) // random direction
+                    if (direction_index == 1) { //left
+                        if (llama.parentElement.getAttribute('cell') != "1") { // if not a wall
+                            if (llama.parentElement.previousElementSibling.childElementCount == 0) { // if empty
+                                llama.parentElement.previousElementSibling.appendChild(llama)
+                            }
+                        }
+                    } else if (direction_index == 2) { //right
+                        if (llama.parentElement.getAttribute('cell') != "20") { // if not a wall
+                            if (llama.parentElement.nextElementSibling.childElementCount == 0) { // if empty
+                                llama.parentElement.nextElementSibling.appendChild(llama)
+                            }
+                        }
+                    } else if (direction_index == 3) { //up
+                        if (llama.parentElement.parentElement.getAttribute('row') != "1") { // if not a wall
+                            if (llama.parentElement.parentElement.previousElementSibling.children[llama.parentElement.getAttribute('cell')-1].childElementCount == 0) { // if empty
+                                llama.parentElement.parentElement.previousElementSibling.children[llama.parentElement.getAttribute('cell')-1].appendChild(llama)
+                            }
+                        }
+                    } else if (direction_index == 4) { //down
+                        if (llama.parentElement.parentElement.getAttribute('row') != "20") { // if not a wall
+                            if (llama.parentElement.parentElement.nextElementSibling.children[llama.parentElement.getAttribute('cell')-1].childElementCount == 0) { // if empty
+                                llama.parentElement.parentElement.nextElementSibling.children[llama.parentElement.getAttribute('cell')-1].appendChild(llama)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        function moveFastLlamas() {
+            for (v=0;v < document.getElementsByClassName('fast').length;v++) { // every fast llama
+                llama = document.getElementsByClassName('fast')[v];
+                if (llama.getAttribute('locked') == null) {
+                    direction_index = (Math.floor(Math.random() * 4)+1)
+                    if (direction_index == 1) { //left
+                        if (llama.parentElement.getAttribute('cell') != "1") {
+                            if (llama.parentElement.previousElementSibling.childElementCount == 0) {
+                                llama.parentElement.previousElementSibling.appendChild(llama)
+                            }
+                        }
+                    } else if (direction_index == 2) { //right
+                        if (llama.parentElement.getAttribute('cell') != "20") {
+                            if (llama.parentElement.nextElementSibling.childElementCount == 0) {
+                                llama.parentElement.nextElementSibling.appendChild(llama)
+                            }
+                        }
+                    } else if (direction_index == 3) { //up
+                        if (llama.parentElement.parentElement.getAttribute('row') != "1") {
+                            if (llama.parentElement.parentElement.previousElementSibling.children[llama.parentElement.getAttribute('cell')-1].childElementCount == 0) {
+                                llama.parentElement.parentElement.previousElementSibling.children[llama.parentElement.getAttribute('cell')-1].appendChild(llama)
+                            }
+                        }
+                    } else if (direction_index == 4) { //down
+                        if (llama.parentElement.parentElement.getAttribute('row') != "20") {
+                            if (llama.parentElement.parentElement.nextElementSibling.children[llama.parentElement.getAttribute('cell')-1].childElementCount == 0) {
+                                llama.parentElement.parentElement.nextElementSibling.children[llama.parentElement.getAttribute('cell')-1].appendChild(llama)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        function changeBackground() {
+            current = document.getElementsByTagName('body')[0].style.backgroundImage;
+            if ((current.match(/\d+/g).map(Number))[0]+1 == 7) {
+                var newnum = 1
+            } else {
+                var newnum = (current.match(/\d+/g).map(Number))[0]+1;
+            }
+            console.log(newnum);
+            document.getElementsByTagName('body')[0].style.backgroundImage = 'url("backgrounds/'+newnum+'.gif")'
+        }
+    </script>
+</head>
+<body style="background-size: contain;background-image:url('backgrounds/1.gif');margin: 2%;">
+    <table style="width:100%;">
+        <tr>
+            <td style="vertical-align: top;width:20%;color:#E70059;">
+                <button onclick="makeLlamas()">FIGHT</button>
+                <button onclick="stopLlamas()">STOP</button>
+                <button onclick="changeBackground()">Change Background</button>
+                <div>
+                    <span class="info">Points: </span><span class="info" id="points">0</span><br>
+                    <span class="info">Time (s) : </span><span class="info" id="time">0</span><span class="info">(/30s)</span><br>
+                    <span class="info">Use arrows to move</span><br>
+                    <span class="info">Use "s" to shoot</span>
+                </div>
+                <div style="width:50%;float:left;">
+                    <span style="font-size:30px;font-weight:600;" class="info">Points:</span><br>
+                    <div style="display: inline-grid;"><span style="font-size:20px;font-weight:600;width: 100%;background-color:#F3F5F4;">5 (power up: also attack an extra block from your target)</span><img src="color pattern clone.gif" class="powerup" power="fire"></div>
+                    <div style="display: inline-grid;"><span style="font-size:20px;font-weight:600;background-color:#F3F5F4;">5 (fast)</span><img src="llama golden.gif" class="" points="5" style="max-height:50%;max-width:50%;float:right;"></div>
+                    <div style="display: inline-grid;"><span style="font-size:20px;font-weight:600;background-color:#F3F5F4;">4</span><img src="llama king.gif" class="" points="4" style="max-height:50%;max-width:50%;float:right;"></div>
+                    <div style="display: inline-grid;"><span style="font-size:20px;font-weight:600;background-color:#F3F5F4;">3 (fast)</span><img src="llama ninja.gif" class="" points="3" style="max-height:50%;max-width:50%;float:right;"></div>
+                </div>
+                <div style="width:50%;float:right;">
+                    <div style="display: inline-grid;"><span style="font-size:20px;font-weight:600;background-color:#F3F5F4;">3</span><img src="llama fancy.gif" class="" points="3" style="max-height:50%;max-width:50%;float:right;"></div>
+                    <div style="display: inline-grid;"><span style="font-size:20px;font-weight:600;background-color:#F3F5F4;">2 (fast)</span><img src="llama cape.gif" class="" points="2" style="max-height:50%;max-width:50%;float:right;"></div>
+                    <div style=""><span style="font-size:20px;font-weight:600;background-color:#F3F5F4;">1</span><img src="llama.gif" class="" points="1" style="float:right;"></div>
+                </div>
+            </td>
+            <td style="vertical-align: top;width:40%;">
+                <table cellspacing="" style="width:100%;table-layout: fixed;background-color:#F3F5F4;padding-left: 4%;padding-top: 4%;padding-bottom: 4%;">
+                    <tr class="row1" row="1">
+                        <td class="cell" cell="1"><img src="Megaman still.gif" id="me" power="none"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row2" row="2">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row3" row="3">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row4" row="4">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row5" row="5">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row6" row="6">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"><img src="llama.gif" class="llama" points="1" locked="yes"></td><td class="cell" cell="5"><img locked="yes" src="llama.gif" class="llama" points="1"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row7" row="7">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"><img src="llama.gif" class="llama" points="1" locked="yes"></td><td class="cell" cell="5"><img locked="yes" src="llama.gif" class="llama" points="1"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row8" row="8">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"><img src="llama.gif" class="llama" points="1" locked="yes"></td><td class="cell" cell="5"><img locked="yes" src="llama.gif" class="llama" points="1"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row9" row="9">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row10" row="10">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row11" row="11">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row12" row="12">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row13" row="13">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row14" row="14">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row15" row="15">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row16" row="16">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row17" row="17">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row18" row="18">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row19" row="19">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                    <tr class="row20" row="20">
+                        <td class="cell" cell="1"></td><td class="cell" cell="2"></td><td class="cell" cell="3"></td><td class="cell" cell="4"></td><td class="cell" cell="5"></td><td class="cell" cell="6"></td><td class="cell" cell="7"></td><td class="cell" cell="8"></td><td class="cell" cell="9"></td><td class="cell" cell="10"></td><td class="cell" cell="11"></td><td class="cell" cell="12"></td><td class="cell" cell="13"></td><td class="cell" cell="14"></td><td class="cell" cell="15"></td><td class="cell" cell="16"></td><td class="cell" cell="17"></td><td class="cell" cell="18"></td><td class="cell" cell="19"></td><td class="cell" cell="20"></td><td  class="cell empty allways_empty" cell="21"><img src="llama.gif" style=""></td>
+                    </tr>
+                </table>
+            </td>
+            <td style="vertical-align: top;width:40%">
+                <img src="logo.png" id="logo" style="float:right;height: unset;margin:5% 0px;">
+                <table style="width:100%;text-align: center;font-size:20px;background-color: #F3F5F4;" id="scores">
+                    <tr><td style="border-right:1px solid black;border-bottom:1px solid black;">POINTS</td><td style="border-bottom:1px solid black;">TIME (s)</td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
