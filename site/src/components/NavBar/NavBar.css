@@ -1,0 +1,19 @@
+.NavBarDiv {
+  background-image: url("../../assets/space.gif");
+  text-align: center;
+  line-height: 60px;
+  border-bottom: 5px solid purple;
+}
+
+a:link, a:visited, a:hover, a:active {
+  text-decoration: none; color: purple;
+}
+
+.NavBarText a:hover {
+  color: red;
+}
+
+.NavBarText {
+  font-weight: bold;
+  margin: 15px;
+}

@@ -1,0 +1,9 @@
+.OddCast {
+  background-image: url("../../assets/satellite.png");
+  margin-top: -20px;
+  width: 100%;
+  height: 660px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: white;
+}

@@ -1,0 +1,10 @@
+.Sim {
+  background-image: url("../../assets/sunset.png");
+  margin-top: -20px;
+  width: 100%;
+  /* height: 660px; */
+  /* height: calc(100% - (60px + 70px)); */
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: white;
+}

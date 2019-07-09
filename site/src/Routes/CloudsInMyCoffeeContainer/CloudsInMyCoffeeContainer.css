@@ -1,0 +1,19 @@
+.CloudsInMyCoffee {
+  background-image: url("../../assets/earth.gif");
+  margin-top: -20px;
+  width: 100%;
+  height: 660px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  color: white;
+}
+
+.HeaderDiv {
+  background: rgba(81,189,135,.5);
+  text-align: center;
+}
+
+.ContentDiv {
+  text-align: justify;
+  padding: 5px;
+}

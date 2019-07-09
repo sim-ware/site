@@ -1,0 +1,16 @@
+.Home {
+  background-image: url("../../assets/peace.jpg");
+  margin-top: -20px;
+  width: 100%;
+  height: 660px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  text-align: center;
+}
+
+.Content {
+  background: rgba(81,189,135,.5);
+  width: 330px;
+  width: 50%;
+  margin: 0 auto;
+}
